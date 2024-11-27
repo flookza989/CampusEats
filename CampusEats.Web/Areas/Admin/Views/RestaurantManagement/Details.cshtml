@@ -1,0 +1,142 @@
+﻿@using CampusEats.Web.Areas.Admin.Models.Restaurant
+@model RestaurantDetailsViewModel
+
+<div class="container-fluid px-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="h3">Restaurant Details</h1>
+        <div class="btn-group">
+            <a asp-action="Edit" asp-route-id="@Model.RestaurantId"
+               class="btn btn-warning">
+                <i class="bi bi-pencil"></i> Edit
+            </a>
+            <a asp-controller="RestaurantMenu" asp-action="Index" asp-route-restaurantId="@Model.RestaurantId"
+               asp-route-restaurantId="@Model.RestaurantId"
+               class="btn btn-info">
+                <i class="bi bi-menu-button-wide"></i> Menu
+            </a>
+            <a asp-action="Index" class="btn btn-outline-secondary">
+                <i class="bi bi-arrow-left"></i> Back
+            </a>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card shadow-sm mb-4">
+                <div class="card-body">
+                    <div class="row mb-3">
+                        <div class="col-md-3">
+                            <strong>Restaurant Name</strong>
+                        </div>
+                        <div class="col-md-9">
+                            @Model.Name
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-md-3">
+                            <strong>Description</strong>
+                        </div>
+                        <div class="col-md-9">
+                            @Model.Description
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-md-3">
+                            <strong>Location</strong>
+                        </div>
+                        <div class="col-md-9">
+                            @Model.Location
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-md-3">
+                            <strong>Phone</strong>
+                        </div>
+                        <div class="col-md-9">
+                            <a href="tel:@Model.Phone">@Model.Phone</a>
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-md-3">
+                            <strong>Operating Hours</strong>
+                        </div>
+                        <div class="col-md-9">
+                            @Model.OpeningTime.ToString(@"hh\:mm") - @Model.ClosingTime.ToString(@"hh\:mm")
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-md-3">
+                            <strong>Status</strong>
+                        </div>
+                        <div class="col-md-9">
+                            <span class="badge @(Model.IsActive ? "bg-success" : "bg-danger")">
+                                @(Model.IsActive ? "Active" : "Inactive")
+                            </span>
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-md-3">
+                            <strong>Created Date</strong>
+                        </div>
+                        <div class="col-md-9">
+                            @Model.CreatedAt.ToString("dd MMMM yyyy")
+                        </div>
+                    </div>
+
+                    @if (Model.UpdatedAt.HasValue)
+                    {
+                        <div class="row mb-3">
+                            <div class="col-md-3">
+                                <strong>Last Updated</strong>
+                            </div>
+                            <div class="col-md-9">
+                                @Model.UpdatedAt.Value.ToString("dd MMMM yyyy HH:mm")
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card shadow-sm mb-4">
+                <div class="card-body">
+                    <h5 class="card-title">Owner Information</h5>
+                    <div class="mb-3">
+                        <strong>Name:</strong> @Model.Owner.FullName
+                    </div>
+                    <div class="mb-3">
+                        <strong>Email:</strong>
+                        <a href="mailto:@Model.Owner.Email">@Model.Owner.Email</a>
+                    </div>
+                    <div class="mb-3">
+                        <strong>Phone:</strong>
+                        <a href="tel:@Model.Owner.Phone">@Model.Owner.Phone</a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <h5 class="card-title">Menu Overview</h5>
+                    <div class="text-center py-3">
+                        <h3 class="display-4">@Model.MenuItemCount</h3>
+                        <p class="text-muted">Total Menu Items</p>
+                    </div>
+                    <div class="d-grid">
+                        <a asp-controller="RestaurantMenu" asp-action="Index" asp-route-restaurantId="@Model.RestaurantId"
+                           class="btn btn-primary">
+                            <i class="bi bi-menu-button-wide"></i> Manage Menu
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

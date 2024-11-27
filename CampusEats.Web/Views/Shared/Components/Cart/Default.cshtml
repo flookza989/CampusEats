@@ -1,0 +1,98 @@
+﻿@model CampusEats.Web.Models.Order.CartViewModel
+
+<div class="offcanvas offcanvas-end" tabindex="-1" id="cartOffcanvas">
+    <div class="offcanvas-header">
+        <h5 class="offcanvas-title">
+            <i class="bi bi-cart3"></i> Your Order
+        </h5>
+        <button type="button" class="btn-close" data-bs-dismiss="offcanvas"></button>
+    </div>
+
+    <div class="offcanvas-body">
+        @if (!Model.Items.Any())
+        {
+            <div class="text-center py-5">
+                <i class="bi bi-cart text-muted" style="font-size: 3rem;"></i>
+                <p class="mt-3">Your cart is empty</p>
+                <a asp-controller="Restaurant" asp-action="Index"
+                   class="btn btn-primary btn-sm">
+                    Browse Restaurants
+                </a>
+            </div>
+        }
+        else
+        {
+            <div class="mb-3">
+                <h6 class="text-muted">Ordering from</h6>
+                <p class="mb-0">@Model.RestaurantName</p>
+            </div>
+
+            <div class="list-group mb-3">
+                @foreach (var item in Model.Items)
+                {
+                    <div class="list-group-item">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="mb-0">@item.Name</h6>
+                                <small class="text-muted">฿@item.Price x @item.Quantity</small>
+                                @if (!string.IsNullOrEmpty(item.SpecialInstructions))
+                                {
+                                    <p class="small text-muted mb-0">
+                                        <i class="bi bi-info-circle"></i>
+                                        @item.SpecialInstructions
+                                    </p>
+                                }
+                            </div>
+                            <div class="text-end">
+                                <p class="mb-2">฿@item.Total</p>
+                                <div class="btn-group btn-group-sm">
+                                    <button type="button" class="btn btn-outline-secondary update-quantity"
+                                            data-item-id="@item.MenuItemId" data-action="decrease">
+                                        <i class="bi bi-dash"></i>
+                                    </button>
+                                    <span class="btn btn-outline-secondary" style="pointer-events: none">
+                                        @item.Quantity
+                                    </span>
+                                    <button type="button" class="btn btn-outline-secondary update-quantity"
+                                            data-item-id="@item.MenuItemId" data-action="increase">
+                                        <i class="bi bi-plus"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Special Instructions</label>
+                <textarea class="form-control" rows="2" id="cartSpecialInstructions">@Model.SpecialInstructions</textarea>
+            </div>
+
+            <div class="card bg-light mb-3">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between mb-2">
+                        <span>Subtotal</span>
+                        <span>฿@Model.SubTotal</span>
+                    </div>
+                    <hr>
+                    <div class="d-flex justify-content-between">
+                        <strong>Total</strong>
+                        <strong>฿@Model.SubTotal</strong>
+                    </div>
+                </div>
+            </div>
+
+            <div class="d-grid gap-2">
+                <a asp-controller="Order" asp-action="Checkout"
+                   class="btn btn-primary">
+                    <i class="bi bi-bag-check"></i> Proceed to Checkout
+                </a>
+                <button type="button" class="btn btn-outline-danger"
+                        onclick="clearCart()">
+                    <i class="bi bi-trash"></i> Clear Cart
+                </button>
+            </div>
+        }
+    </div>
+</div>

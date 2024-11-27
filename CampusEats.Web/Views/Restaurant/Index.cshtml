@@ -1,0 +1,109 @@
+﻿@model CampusEats.Web.Models.Restaurant.RestaurantListViewModel
+
+@{
+    ViewData["Title"] = "Restaurants";
+}
+
+<div class="container">
+    <div class="row mb-4">
+        <div class="col">
+            <h1 class="display-4">Campus Restaurants</h1>
+        </div>
+        <div class="col-md-4">
+            <form method="get" class="d-flex">
+                <input type="text" name="searchTerm" class="form-control"
+                       placeholder="Search restaurants..." value="@Model.SearchTerm">
+                <button type="submit" class="btn btn-primary ms-2">
+                    <i class="bi bi-search"></i>
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+        @foreach (var restaurant in Model.Restaurants)
+        {
+            <div class="col">
+                <div class="card h-100 restaurant-card">
+                    @if (restaurant.FeaturedItems.Any() && !string.IsNullOrEmpty(restaurant.FeaturedItems.First().ImageUrl))
+                    {
+                        <img src="@restaurant.FeaturedItems.First().ImageUrl"
+                             class="card-img-top" alt="@restaurant.Name"
+                             style="height: 200px; object-fit: cover;">
+                    }
+                    else
+                    {
+                        <div class="card-img-top bg-light d-flex align-items-center justify-content-center"
+                             style="height: 200px;">
+                            <i class="bi bi-building text-muted" style="font-size: 4rem;"></i>
+                        </div>
+                    }
+
+                    <div class="card-body">
+                        <h5 class="card-title">@restaurant.Name</h5>
+                        <p class="card-text text-muted small mb-2">
+                            <i class="bi bi-geo-alt"></i> @restaurant.Location
+                        </p>
+                        <p class="card-text">@restaurant.Description</p>
+
+                        @if (restaurant.IsOpen)
+                        {
+                            <span class="badge bg-success">Open</span>
+                        }
+                        else
+                        {
+                            <span class="badge bg-danger">Closed</span>
+                        }
+
+                        <p class="card-text small mt-2">
+                            <i class="bi bi-clock"></i>
+                            @restaurant.OpeningTime - @restaurant.ClosingTime
+                        </p>
+
+                        @if (restaurant.MenuItemCount > 0)
+                        {
+                            <p class="card-text small">
+                                <i class="bi bi-menu-button-wide"></i>
+                                @restaurant.MenuItemCount items on menu
+                            </p>
+                        }
+                    </div>
+
+                    @if (restaurant.FeaturedItems.Any())
+                    {
+                        <div class="card-footer bg-light">
+                            <small class="text-muted">Featured Items:</small>
+                            <div class="mt-2">
+                                @foreach (var item in restaurant.FeaturedItems)
+                                {
+                                    <span class="badge bg-secondary me-1">@item.Name</span>
+                                }
+                            </div>
+                        </div>
+                    }
+
+                    <div class="card-footer">
+                        <a asp-action="Details" asp-route-id="@restaurant.RestaurantId"
+                           class="btn btn-primary w-100">
+                            <i class="bi bi-arrow-right"></i> View Menu
+                        </a>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+
+    @if (!Model.Restaurants.Any())
+    {
+        <div class="text-center my-5">
+            <i class="bi bi-emoji-frown display-1 text-muted"></i>
+            <h3 class="mt-3">No restaurants found</h3>
+            @if (!string.IsNullOrEmpty(Model.SearchTerm))
+            {
+                <p class="text-muted">
+                    Try different search terms or <a asp-action="Index">view all restaurants</a>
+                </p>
+            }
+        </div>
+    }
+</div>

@@ -1,0 +1,125 @@
+﻿@model CampusEats.Web.Models.Restaurant.RestaurantDetailViewModel
+
+@{
+    ViewData["Title"] = Model.Name;
+}
+
+<div class="container">
+    <nav aria-label="breadcrumb" class="my-3">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a asp-action="Index">Restaurants</a></li>
+            <li class="breadcrumb-item active">@Model.Name</li>
+        </ol>
+    </nav>
+
+    <div class="row">
+        <div class="col-md-4">
+            <div class="card mb-4">
+                <div class="card-body">
+                    <h1 class="card-title h3">@Model.Name</h1>
+                    <p class="card-text">@Model.Description</p>
+
+                    <hr>
+
+                    <div class="d-flex align-items-center mb-3">
+                        @if (Model.IsOpen)
+                        {
+                            <span class="badge bg-success me-2">Open Now</span>
+                        }
+                        else
+                        {
+                            <span class="badge bg-danger me-2">Closed</span>
+                        }
+                        <span class="text-muted">
+                            <i class="bi bi-clock"></i>
+                            @Model.OpeningTime - @Model.ClosingTime
+                        </span>
+                    </div>
+
+                    <p class="card-text mb-2">
+                        <i class="bi bi-geo-alt"></i> @Model.Location
+                    </p>
+
+                    <p class="card-text">
+                        <i class="bi bi-telephone"></i>
+                        <a href="tel:@Model.Phone">@Model.Phone</a>
+                    </p>
+
+                    @if (Model.IsOpen)
+                    {
+                        <a href="#menu" class="btn btn-primary w-100">
+                            <i class="bi bi-cart-plus"></i> Order Now
+                        </a>
+                    }
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-body">
+                    <h2 class="card-title h4" id="menu">Menu</h2>
+
+                    @if (!Model.MenuItems.Any())
+                    {
+                        <p class="text-muted">No menu items available.</p>
+                    }
+                    else
+                    {
+                        <div class="row row-cols-1 row-cols-md-2 g-4 mt-2">
+                            @foreach (var item in Model.MenuItems)
+                            {
+                                <div class="col">
+                                    <div class="card h-100 @(!item.IsAvailable ? "bg-light" : "")">
+                                        @if (!string.IsNullOrEmpty(item.ImageUrl))
+                                        {
+                                            <img src="@item.ImageUrl" class="card-img-top menu-item-image"
+                                                 alt="@item.Name" style="height: 150px; object-fit: cover;">
+                                        }
+                                        <div class="card-body">
+                                            <div class="d-flex justify-content-between align-items-start">
+                                                <h5 class="card-title">@item.Name</h5>
+                                                <span class="badge bg-primary">฿@item.Price</span>
+                                            </div>
+                                            <p class="card-text small">@item.Description</p>
+
+                                            @if (Model.IsOpen && item.IsAvailable)
+                                            {
+                                                <button type="button" class="btn btn-sm btn-outline-primary add-to-cart"
+                                                        data-item-id="@item.ItemId"
+                                                        data-item-name="@item.Name"
+                                                        data-item-price="@item.Price">
+                                                    <i class="bi bi-plus-circle"></i> Add to Order
+                                                </button>
+                                            }
+                                            else if (!item.IsAvailable)
+                                            {
+                                                <span class="badge bg-secondary">Not Available</span>
+                                            }
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // Add to cart functionality
+        document.querySelectorAll('.add-to-cart').forEach(button => {
+            button.addEventListener('click', function() {
+                const itemId = this.dataset.itemId;
+                const itemName = this.dataset.itemName;
+                const itemPrice = this.dataset.itemPrice;
+
+                // Add your cart logic here
+                alert(`Added ${itemName} to cart`);
+            });
+        });
+    </script>
+}

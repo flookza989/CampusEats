@@ -1,0 +1,55 @@
+﻿@using CampusEats.Web.Areas.RestaurantOwner.Models.RestaurantOwner
+@model DashboardViewModel
+
+<div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="h3 mb-0">@Model.Restaurant.Name</h1>
+            <p class="text-muted">
+                Status:
+                @if (Model.IsOpen)
+                {
+                    <span class="badge bg-success">Open</span>
+                }
+                else
+                {
+                    <span class="badge bg-danger">Closed</span>
+                }
+            </p>
+        </div>
+        <div>
+            <a asp-controller="Settings" asp-action="Index" class="btn btn-outline-primary">
+                <i class="bi bi-gear"></i> Settings
+            </a>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-3">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Today's Revenue</h5>
+                    <h2 class="mb-0">฿@Model.TotalRevenue.ToString("N2")</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Pending Orders</h5>
+                    <h2 class="mb-0">@Model.PendingOrders</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Menu Items</h5>
+                    <h2 class="mb-0">@Model.MenuItemCount</h2>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add more dashboard content as needed -->
+</div>

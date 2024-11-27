@@ -1,0 +1,41 @@
+﻿@model List<CampusEats.Web.Models.Notification.NotificationItemViewModel>
+
+@foreach (var notification in Model)
+{
+    <div class="notification-item @(!notification.IsRead ? "unread" : "")"
+         data-notification-id="@notification.NotificationId">
+        <div class="d-flex align-items-start">
+            <div class="notification-icon me-3">
+                @switch (notification.Type)
+                {
+                    case CampusEats.Web.Models.Notification.NotificationType.OrderStatus:
+                        <i class="bi bi-bag-check fs-4"></i>
+                        break;
+                    case CampusEats.Web.Models.Notification.NotificationType.Promotion:
+                        <i class="bi bi-star fs-4"></i>
+                        break;
+                    default:
+                        <i class="bi bi-bell fs-4"></i>
+                        break;
+                }
+            </div>
+            <div class="notification-content flex-grow-1">
+                <div class="d-flex justify-content-between align-items-start">
+                    <h6 class="mb-1">@notification.RestaurantName</h6>
+                    <small class="text-muted">
+                        @notification.CreatedAt.ToString("MMM dd, HH:mm")
+                    </small>
+                </div>
+                <p class="mb-1">@notification.Message</p>
+                @if (notification.OrderId.HasValue)
+                {
+                    <a asp-controller="Order" asp-action="Details"
+                       asp-route-id="@notification.OrderId"
+                       class="btn btn-sm btn-outline-primary">
+                        View Order
+                    </a>
+                }
+            </div>
+        </div>
+    </div>
+}

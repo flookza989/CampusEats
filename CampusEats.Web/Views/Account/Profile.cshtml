@@ -1,0 +1,153 @@
+﻿@model CampusEats.Web.Models.Auth.ProfileViewModel
+
+@{
+    ViewData["Title"] = "Profile";
+}
+
+<div class="row">
+    <div class="col-md-8 mx-auto">
+        @if (TempData["SuccessMessage"] != null)
+        {
+            <div class="alert alert-success alert-dismissible fade show" role="alert">
+                @TempData["SuccessMessage"]
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        }
+
+        <div class="card shadow-sm mb-4">
+            <div class="card-body">
+                <h2 class="card-title mb-4">Profile Information</h2>
+
+                <form asp-action="UpdateProfile" method="post">
+                    <div asp-validation-summary="ModelOnly" class="alert alert-danger"></div>
+
+                    <div class="row mb-3">
+                        <label class="col-sm-3 col-form-label">Username</label>
+                        <div class="col-sm-9">
+                            <input asp-for="Username" class="form-control" value="@Model.Username" readonly />
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <label asp-for="Email" class="col-sm-3 col-form-label"></label>
+                        <div class="col-sm-9">
+                            <input asp-for="Email" class="form-control" />
+                            <span asp-validation-for="Email" class="text-danger"></span>
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <label asp-for="FullName" class="col-sm-3 col-form-label"></label>
+                        <div class="col-sm-9">
+                            <input asp-for="FullName" class="form-control" />
+                            <span asp-validation-for="FullName" class="text-danger"></span>
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <label asp-for="Phone" class="col-sm-3 col-form-label"></label>
+                        <div class="col-sm-9">
+                            <input asp-for="Phone" class="form-control" />
+                            <span asp-validation-for="Phone" class="text-danger"></span>
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <label class="col-sm-3 col-form-label">User Type</label>
+                        <div class="col-sm-9">
+                            <input asp-for="UserType" class="form-control" value="@Model.UserType" readonly />
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <label class="col-sm-3 col-form-label">Member Since</label>
+                        <div class="col-sm-9">
+                            <input class="form-control" value="@Model.CreatedAt.ToString("MMMM dd, yyyy")" readonly />
+                        </div>
+                    </div>
+
+                    <div class="text-end">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-save"></i> Save Changes
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Change Password Section -->
+        <div class="card shadow-sm">
+            <div class="card-body">
+                <h3 class="card-title mb-4">Change Password</h3>
+
+                <form asp-action="ChangePassword" method="post">
+                    <div asp-validation-summary="ModelOnly" class="alert alert-danger"></div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Current Password</label>
+                        <input name="CurrentPassword" type="password" class="form-control"
+                               required minlength="6" />
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">New Password</label>
+                        <input name="NewPassword" type="password" class="form-control"
+                               required minlength="6" />
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Confirm New Password</label>
+                        <input name="ConfirmPassword" type="password" class="form-control"
+                               required minlength="6" />
+                    </div>
+
+                    <div class="text-end">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-lock"></i> Change Password
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        $(document).ready(function() {
+            $('#changePasswordForm').validate({
+                rules: {
+                    CurrentPassword: {
+                        required: true,
+                        minlength: 6
+                    },
+                    NewPassword: {
+                        required: true,
+                        minlength: 6
+                    },
+                    ConfirmPassword: {
+                        required: true,
+                        minlength: 6,
+                        equalTo: "#NewPassword"
+                    }
+                },
+                messages: {
+                    CurrentPassword: {
+                        required: "Please enter your current password",
+                        minlength: "Password must be at least 6 characters long"
+                    },
+                    NewPassword: {
+                        required: "Please enter a new password",
+                        minlength: "Password must be at least 6 characters long"
+                    },
+                    ConfirmPassword: {
+                        required: "Please confirm your new password",
+                        minlength: "Password must be at least 6 characters long",
+                        equalTo: "Passwords do not match"
+                    }
+                }
+            });
+        });
+    </script>
+}

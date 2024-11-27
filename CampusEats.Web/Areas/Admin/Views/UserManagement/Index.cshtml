@@ -1,0 +1,212 @@
+﻿@using CampusEats.Web.Areas.Admin.Models.User
+@model List<UserViewModel>
+
+<div class="container-fluid px-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="h3">User Management System</h1>
+        <div class="d-flex gap-2">
+            <div class="input-group">
+                <input type="text" id="searchInput" class="form-control" placeholder="Search users...">
+                <button class="btn btn-outline-secondary" type="button">
+                    <i class="bi bi-search"></i>
+                </button>
+            </div>
+            <button class="btn btn-primary" onclick="exportToExcel()">
+                <i class="bi bi-file-earmark-excel"></i> Export
+            </button>
+        </div>
+    </div>
+
+    <div class="card shadow-sm">
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover" id="userTable">
+                    <thead>
+                        <tr>
+                            <th>Full Name</th>
+                            <th>Username</th>
+                            <th>Email</th>
+                            <th>User Type</th>
+                            <th>Status</th>
+                            <th>Created Date</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var user in Model)
+                        {
+                            <tr>
+                                <td>@user.FullName</td>
+                                <td>@user.Username</td>
+                                <td>@user.Email</td>
+                                <td>
+                                    @{
+                                        var badgeClass = user.UserType switch
+                                        {
+                                            "Staff" => "bg-danger",
+                                            "RestaurantOwner" => "bg-success",
+                                            _ => "bg-primary"
+                                        };
+                                    }
+                                    <span class="badge @badgeClass">@user.UserType</span>
+                                </td>
+                                <td>
+                                    <div class="form-check form-switch">
+                                        <input class="form-check-input toggle-status" type="checkbox"
+                                               data-user-id="@user.UserId"
+                                        @(user.IsActive ? "checked" : "")
+                                        @(user.UserType == "Staff" ? "disabled" : "")>
+                                        <label class="form-check-label small">
+                                            @(user.IsActive ? "Active" : "Inactive")
+                                        </label>
+                                    </div>
+                                </td>
+                                <td>@user.CreatedAt.ToString("dd MMM yyyy")</td>
+                                <td>
+                                    <div class="btn-group">
+                                        <a asp-action="Details" asp-route-id="@user.UserId"
+                                           class="btn btn-sm btn-outline-primary" title="View Details">
+                                            <i class="bi bi-eye"></i>
+                                        </a>
+                                        <a asp-action="Edit" asp-route-id="@user.UserId"
+                                           class="btn btn-sm btn-outline-warning" title="Edit User">
+                                            <i class="bi bi-pencil"></i>
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // Search function
+        document.getElementById('searchInput').addEventListener('keyup', function(e) {
+            const searchText = e.target.value.toLowerCase();
+            const table = document.getElementById('userTable');
+            const rows = table.getElementsByTagName('tr');
+
+            for (let row of rows) {
+                if (row.getElementsByTagName('td').length > 0) {
+                    const text = row.textContent.toLowerCase();
+                    row.style.display = text.includes(searchText) ? '' : 'none';
+                }
+            }
+        });
+
+        // Toggle Status
+        document.querySelectorAll('.toggle-status').forEach(toggle => {
+            toggle.addEventListener('change', async function() {
+                const userId = this.dataset.userId;
+                const isChecked = this.checked;
+                const statusLabel = this.nextElementSibling;
+
+                try {
+                    const response = await fetch(`/Admin/UserManagement/ToggleStatus/${userId}`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'RequestVerificationToken': document
+                                .querySelector('input[name="__RequestVerificationToken"]').value
+                        }
+                    });
+
+                    const data = await response.json();
+                    if (data.success) {
+                        statusLabel.textContent = isChecked ? 'Active' : 'Inactive';
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Updated',
+                            text: 'User status updated successfully',
+                            toast: true,
+                            position: 'top-end',
+                            showConfirmButton: false,
+                            timer: 3000
+                        });
+                    } else {
+                        this.checked = !isChecked;
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Error',
+                            text: data.message || 'Failed to update user status',
+                            toast: true,
+                            position: 'top-end',
+                            showConfirmButton: false,
+                            timer: 3000
+                        });
+                    }
+                } catch (error) {
+                    this.checked = !isChecked;
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: 'An error occurred while updating status',
+                        toast: true,
+                        position: 'top-end',
+                        showConfirmButton: false,
+                        timer: 3000
+                    });
+                }
+            });
+        });
+
+        // Export to Excel function
+        function exportToExcel() {
+            const table = document.getElementById('userTable');
+            const rows = Array.from(table.querySelectorAll('tr'));
+
+            const data = rows.map(row => {
+                const cells = Array.from(row.querySelectorAll('th, td'));
+                return cells.map((cell, index) => {
+                    if (cell.classList.contains('actions-column') ||
+                        cell.querySelector('.btn')) {
+                        return null;
+                    }
+
+                    let value = '';
+
+                    if (cell.querySelector('.form-check-input')) {
+                        value = cell.querySelector('.form-check-input').checked ? 'Active' : 'Inactive';
+                    } else {
+                        value = cell.textContent.trim();
+                    }
+
+                    if (index === 5) { // Created Date
+                        try {
+                            const date = new Date(value);
+                            if (!isNaN(date)) {
+                                value = date.toLocaleDateString('en-GB');
+                            }
+                        } catch (e) {
+                            console.error('Date parsing error:', e);
+                        }
+                    }
+                    return value;
+                }).filter(cell => cell !== null);
+            });
+
+            const ws = XLSX.utils.aoa_to_sheet(data);
+
+            const colWidths = data[0].map((_, i) => {
+                let maxWidth = 0;
+                data.forEach(row => {
+                    const cellLength = (row[i] || '').toString().length;
+                    maxWidth = Math.max(maxWidth, cellLength);
+                });
+                return { wch: Math.min(maxWidth + 2, 50) };
+            });
+            ws['!cols'] = colWidths;
+
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, "Users");
+
+            const fileName = `Users_${new Date().toISOString().split('T')[0]}.xlsx`;
+            XLSX.writeFile(wb, fileName);
+        }
+    </script>
+}

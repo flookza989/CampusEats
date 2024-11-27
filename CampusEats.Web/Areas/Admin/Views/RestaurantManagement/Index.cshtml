@@ -1,0 +1,206 @@
+﻿@using CampusEats.Web.Areas.Admin.Models.Restaurant
+@model List<RestaurantViewModel>
+
+<div class="container-fluid px-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="h3">Restaurant Management</h1>
+        <div class="d-flex gap-2">
+            <div class="input-group">
+                <input type="text" id="searchInput" class="form-control" placeholder="Search restaurants...">
+                <button class="btn btn-outline-secondary" type="button">
+                    <i class="bi bi-search"></i>
+                </button>
+            </div>
+            <button class="btn btn-primary" onclick="exportToExcel()">
+                <i class="bi bi-file-earmark-excel"></i> Export
+            </button>
+        </div>
+    </div>
+
+    <div class="card shadow-sm">
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover" id="restaurantTable">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Name</th>
+                            <th>Location</th>
+                            <th>Owner</th>
+                            <th>Operating Hours</th>
+                            <th>Status</th>
+                            <th>Created Date</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var restaurant in Model)
+                        {
+                            <tr>
+                                <td>
+                                    <div class="d-flex align-items-center">
+                                        <i class="bi bi-shop me-2"></i>
+                                        <div>
+                                            <div>@restaurant.Name</div>
+                                            <small class="text-muted">@restaurant.Phone</small>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>@restaurant.Location</td>
+                                <td>@restaurant.OwnerName</td>
+                                <td>
+                                    @{
+                                        var isCurrentlyOpen = DateTime.Now.TimeOfDay >= restaurant.OpeningTime
+                                        && DateTime.Now.TimeOfDay <= restaurant.ClosingTime;
+                                    }
+                                    <div>@restaurant.OpeningTime.ToString("hh\\:mm") - @restaurant.ClosingTime.ToString("hh\\:mm")</div>
+                                    <small class="@(isCurrentlyOpen ? "text-success" : "text-danger")">
+                                        <i class="bi @(isCurrentlyOpen ? "bi-clock" : "bi-clock-fill")"></i>
+                                        @(isCurrentlyOpen ? "Open" : "Closed")
+                                    </small>
+                                </td>
+                                <td>
+                                    <div class="form-check form-switch">
+                                        <input class="form-check-input toggle-status" type="checkbox"
+                                               data-restaurant-id="@restaurant.RestaurantId"
+                                        @(restaurant.IsActive ? "checked" : "")>
+                                        <label class="form-check-label small">
+                                            @(restaurant.IsActive ? "Active" : "Inactive")
+                                        </label>
+                                    </div>
+                                </td>
+                                <td>@restaurant.CreatedAt.ToString("dd MMM yyyy")</td>
+                                <td>
+                                    <div class="btn-group">
+                                        <a asp-action="Details" asp-route-id="@restaurant.RestaurantId"
+                                           class="btn btn-sm btn-outline-primary" title="View Details">
+                                            <i class="bi bi-eye"></i>
+                                        </a>
+                                        <a asp-action="Edit" asp-route-id="@restaurant.RestaurantId"
+                                           class="btn btn-sm btn-outline-warning" title="Edit Restaurant">
+                                            <i class="bi bi-pencil"></i>
+                                        </a>
+                                        <a asp-controller="RestaurantMenu" asp-action="Index" asp-route-restaurantId="@restaurant.RestaurantId"
+                                           class="btn btn-sm btn-outline-info" title="View Menu Items">
+                                            <i class="bi bi-menu-button-wide"></i>
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Menu Items Modal -->
+<div class="modal fade" id="menuModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Menu Items</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div id="menuContent"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // Search function
+        document.getElementById('searchInput').addEventListener('keyup', function(e) {
+            const searchText = e.target.value.toLowerCase();
+            const table = document.getElementById('restaurantTable');
+            const rows = table.getElementsByTagName('tr');
+
+            for (let row of rows) {
+                if (row.getElementsByTagName('td').length > 0) {
+                    const text = row.textContent.toLowerCase();
+                    row.style.display = text.includes(searchText) ? '' : 'none';
+                }
+            }
+        });
+
+        // Toggle status function
+        document.querySelectorAll('.toggle-status').forEach(toggle => {
+            toggle.addEventListener('change', async function() {
+                const restaurantId = this.dataset.restaurantId;
+                const isChecked = this.checked;
+                const statusLabel = this.nextElementSibling;
+
+                try {
+                    const result = await Swal.fire({
+                        title: 'Confirm Status Change',
+                        text: `Do you want to ${isChecked ? 'activate' : 'deactivate'} this restaurant?`,
+                        icon: 'warning',
+                        showCancelButton: true,
+                        confirmButtonText: 'Yes',
+                        cancelButtonText: 'No'
+                    });
+
+                    if (result.isConfirmed) {
+                        const response = await fetch(`/Admin/RestaurantManagement/ToggleStatus/${restaurantId}`, {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                            }
+                        });
+
+                        const data = await response.json();
+                        if (data.success) {
+                            statusLabel.textContent = isChecked ? 'Active' : 'Inactive';
+                            Swal.fire('Success', 'Restaurant status updated successfully', 'success');
+                        } else {
+                            this.checked = !isChecked;
+                            Swal.fire('Error', data.message || 'Failed to update status', 'error');
+                        }
+                    } else {
+                        this.checked = !isChecked;
+                    }
+                } catch (error) {
+                    this.checked = !isChecked;
+                    Swal.fire('Error', 'An error occurred while updating status', 'error');
+                }
+            });
+        });
+
+        // View menu items function
+        async function viewMenuItems(restaurantId) {
+            try {
+                const response = await fetch(`/Admin/RestaurantManagement/GetMenuItems/${restaurantId}`);
+                const data = await response.json();
+
+                let menuHtml = '<div class="table-responsive"><table class="table">';
+                menuHtml += '<thead><tr><th>Name</th><th>Price</th><th>Status</th></tr></thead><tbody>';
+
+                data.forEach(item => {
+                    menuHtml += `
+                        <tr>
+                            <td>${item.name}</td>
+                            <td>$${item.price.toFixed(2)}</td>
+                            <td>${item.isAvailable ? '<span class="badge bg-success">Available</span>' :
+                                                    '<span class="badge bg-danger">Unavailable</span>'}</td>
+                        </tr>`;
+                });
+
+                menuHtml += '</tbody></table></div>';
+                document.getElementById('menuContent').innerHTML = menuHtml;
+
+                new bootstrap.Modal(document.getElementById('menuModal')).show();
+            } catch (error) {
+                Swal.fire('Error', 'Failed to load menu items', 'error');
+            }
+        }
+
+        // Export to Excel function
+        function exportToExcel() {
+            const table = document.getElementById('restaurantTable');
+            const wb = XLSX.utils.table_to_book(table, { sheet: "Restaurants" });
+            XLSX.writeFile(wb, 'restaurants.xlsx');
+        }
+    </script>
+}

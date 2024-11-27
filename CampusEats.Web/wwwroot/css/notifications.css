@@ -1,0 +1,67 @@
+﻿/* Notification List Styles */
+.notification-item {
+    padding: 1rem;
+    border-bottom: 1px solid #eee;
+    transition: background-color 0.3s;
+}
+
+    .notification-item:last-child {
+        border-bottom: none;
+    }
+
+    .notification-item.unread {
+        background-color: #f8f9fa;
+    }
+
+    .notification-item:hover {
+        background-color: #f1f3f5;
+    }
+
+.notification-icon {
+    color: #6c757d;
+}
+
+.notification-item.unread .notification-icon {
+    color: #0d6efd;
+}
+
+/* Notification Badge */
+.notification-badge {
+    position: absolute;
+    top: 0;
+    right: 0;
+    transform: translate(50%, -50%);
+    padding: 0.25em 0.6em;
+    font-size: 0.75rem;
+    line-height: 1;
+    text-align: center;
+    white-space: nowrap;
+    vertical-align: baseline;
+    border-radius: 10rem;
+}
+
+/* Toast Notification */
+.toast-notification {
+    position: fixed;
+    top: 1rem;
+    right: 1rem;
+    z-index: 1050;
+    max-width: 350px;
+}
+
+/* Animation */
+@keyframes notification-fade-in {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.notification-item {
+    animation: notification-fade-in 0.3s ease-out;
+}

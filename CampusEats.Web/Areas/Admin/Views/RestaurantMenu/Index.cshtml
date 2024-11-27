@@ -1,0 +1,169 @@
+﻿@using CampusEats.Web.Areas.Admin.Models.Restaurant
+@model RestaurantMenuViewModel
+
+<div class="container-fluid px-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="h3 mb-0">@Model.RestaurantName - Menu Management</h1>
+            <p class="text-muted">
+                Total Items: @Model.TotalItems | Available: @Model.AvailableItems
+            </p>
+        </div>
+        <div class="btn-group">
+            <a asp-action="Create" asp-route-restaurantId="@Model.RestaurantId"
+               class="btn btn-primary">
+                <i class="bi bi-plus-circle"></i> Add Menu Item
+            </a>
+            <a asp-controller="RestaurantManagement" asp-action="Details"
+               asp-route-id="@Model.RestaurantId"
+               class="btn btn-outline-secondary">
+                <i class="bi bi-arrow-left"></i> Back to Restaurant
+            </a>
+        </div>
+    </div>
+
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            @TempData["SuccessMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    @if (!Model.MenuItems.Any())
+    {
+        <div class="text-center py-5">
+            <i class="bi bi-journal-text display-1 text-muted"></i>
+            <h3 class="mt-3">No Menu Items</h3>
+            <p class="text-muted">Start adding items to your menu</p>
+            <a asp-action="Create" asp-route-restaurantId="@Model.RestaurantId"
+               class="btn btn-primary">
+                <i class="bi bi-plus-circle"></i> Add First Item
+            </a>
+        </div>
+    }
+    else
+    {
+        <div class="row">
+            @foreach (var item in Model.MenuItems)
+            {
+                <div class="col-md-4 mb-4">
+                    <div class="card h-100">
+                        @if (!string.IsNullOrEmpty(item.ImageUrl))
+                        {
+                            <img src="@item.ImageUrl" class="card-img-top"
+                                 alt="@item.Name" style="height: 200px; object-fit: cover;">
+                        }
+                        else
+                        {
+                            <div class="card-img-top bg-light d-flex align-items-center justify-content-center"
+                                 style="height: 200px;">
+                                <i class="bi bi-image text-muted" style="font-size: 3rem;"></i>
+                            </div>
+                        }
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-start mb-2">
+                                <h5 class="card-title mb-0">@item.Name</h5>
+                                <div class="form-check form-switch">
+                                    <input class="form-check-input toggle-availability" type="checkbox"
+                                           data-item-id="@item.ItemId" @(item.IsAvailable ? "checked" : "")>
+                                </div>
+                            </div>
+                            <p class="card-text text-muted small mb-3">@item.Description</p>
+                            <h6 class="mb-3">฿@item.Price.ToString("N2")</h6>
+                            <div class="btn-group">
+                                <a asp-action="Edit" asp-route-id="@item.ItemId"
+                                   class="btn btn-sm btn-outline-primary">
+                                    <i class="bi bi-pencil"></i> Edit
+                                </a>
+                                <button type="button" class="btn btn-sm btn-outline-danger"
+                                        onclick="confirmDelete(@item.ItemId, '@item.Name')">
+                                    <i class="bi bi-trash"></i> Delete
+                                </button>
+                            </div>
+                        </div>
+                        <div class="card-footer text-muted small">
+                            <i class="bi bi-clock"></i>
+                            Last updated: @(item.UpdatedAt?.ToString("MMM dd, yyyy HH:mm") ??
+                    item.CreatedAt.ToString("MMM dd, yyyy HH:mm"))
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div class="modal fade" id="deleteModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Delete Menu Item</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p>Are you sure you want to delete "<span id="deleteItemName"></span>"?</p>
+                <p class="text-danger">This action cannot be undone.</p>
+            </div>
+            <div class="modal-footer">
+                <form id="deleteForm" asp-action="Delete" method="post">
+                    <input type="hidden" id="deleteItemId" name="id" />
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        Cancel
+                    </button>
+                    <button type="submit" class="btn btn-danger">Delete</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // Toggle availability
+        document.querySelectorAll('.toggle-availability').forEach(toggle => {
+            toggle.addEventListener('change', async function() {
+                const itemId = this.dataset.itemId;
+                const isChecked = this.checked;
+
+                try {
+                    const response = await fetch(`/Admin/RestaurantMenu/ToggleAvailability/${itemId}`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'RequestVerificationToken': document
+                                .querySelector('input[name="__RequestVerificationToken"]').value
+                        }
+                    });
+
+                    const data = await response.json();
+                    if (!data.success) {
+                        this.checked = !isChecked;
+                        Swal.fire('Error', data.message || 'Failed to update availability', 'error');
+                    } else {
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Updated',
+                            text: 'Menu item availability updated successfully',
+                            toast: true,
+                            position: 'top-end',
+                            showConfirmButton: false,
+                            timer: 3000
+                        });
+                    }
+                } catch (error) {
+                    this.checked = !isChecked;
+                    Swal.fire('Error', 'An error occurred', 'error');
+                }
+            });
+        });
+
+        // Delete confirmation
+        function confirmDelete(itemId, itemName) {
+            document.getElementById('deleteItemId').value = itemId;
+            document.getElementById('deleteItemName').textContent = itemName;
+            new bootstrap.Modal(document.getElementById('deleteModal')).show();
+        }
+    </script>
+}

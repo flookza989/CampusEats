@@ -1,0 +1,181 @@
+﻿@using CampusEats.Web.Areas.Admin.Models.Restaurant
+@model RestaurantEditViewModel
+
+<div class="container-fluid px-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="h3">Edit Restaurant</h1>
+        <a asp-action="Details" asp-route-id="@Model.RestaurantId"
+           class="btn btn-outline-secondary">
+            <i class="bi bi-arrow-left"></i> Back to Details
+        </a>
+    </div>
+
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                        <form asp-area="Admin" asp-controller="RestaurantManagement" asp-action="Edit" method="post">
+                        <input type="hidden" asp-for="RestaurantId" />
+                        <input type="hidden" asp-for="OwnerId" />
+                        <div asp-validation-summary="ModelOnly" class="alert alert-danger"></div>
+
+                        <div class="mb-3">
+                            <label asp-for="Name" class="form-label">Restaurant Name</label>
+                            <input asp-for="Name" class="form-control" />
+                            <span asp-validation-for="Name" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="Description" class="form-label">Description</label>
+                            <textarea asp-for="Description" class="form-control" rows="3"></textarea>
+                            <span asp-validation-for="Description" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="Location" class="form-label">Location</label>
+                            <input asp-for="Location" class="form-control" />
+                            <span asp-validation-for="Location" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="Phone" class="form-label">Phone</label>
+                            <input asp-for="Phone" class="form-control" />
+                            <span asp-validation-for="Phone" class="text-danger"></span>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label asp-for="OpeningTime" class="form-label">Opening Time</label>
+                                <input asp-for="OpeningTime" class="form-control" type="time" />
+                                <span asp-validation-for="OpeningTime" class="text-danger"></span>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label asp-for="ClosingTime" class="form-label">Closing Time</label>
+                                <input asp-for="ClosingTime" class="form-control" type="time" />
+                                <span asp-validation-for="ClosingTime" class="text-danger"></span>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <div class="form-check form-switch">
+                                <input asp-for="IsActive" class="form-check-input" />
+                                <label asp-for="IsActive" class="form-check-label">Active</label>
+                            </div>
+                            <span asp-validation-for="IsActive" class="text-danger"></span>
+                        </div>
+
+                        <div class="text-end">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="bi bi-save"></i> Save Changes
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card shadow-sm mb-4">
+                <div class="card-body">
+                    <h5 class="card-title">Restaurant Owner</h5>
+                    @if (Model.Owner != null)
+                    {
+                        <div class="mb-2">
+                            <strong>Name:</strong> @Model.Owner.FullName
+                        </div>
+                        <div class="mb-2">
+                            <strong>Email:</strong>
+                            <a href="mailto:@Model.Owner.Email">@Model.Owner.Email</a>
+                        </div>
+                        <div class="mb-2">
+                            <strong>Phone:</strong>
+                            <a href="tel:@Model.Owner.Phone">@Model.Owner.Phone</a>
+                        </div>
+                    }
+                    else
+                    {
+                        <p class="text-muted">No owner assigned</p>
+                    }
+                </div>
+            </div>
+
+            <div class="card shadow-sm mb-4">
+                <div class="card-body">
+                    <h5 class="card-title">Restaurant Status</h5>
+                    <p class="text-muted">
+                        <i class="bi bi-info-circle"></i>
+                        Deactivating a restaurant will prevent customers from placing new orders.
+                        Existing orders will not be affected.
+                    </p>
+                </div>
+            </div>
+
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <h5 class="card-title">Quick Actions</h5>
+                    <div class="d-grid gap-2">
+                        <a asp-area="Admin" asp-controller="RestaurantMenu"
+                           asp-action="Index" asp-route-restaurantId="@Model.RestaurantId"
+                           class="btn btn-outline-primary">
+                            <i class="bi bi-menu-button-wide"></i> Manage Menu
+                        </a>
+                        <button type="button"
+                                class="btn @(Model.IsActive ? "btn-danger" : "btn-success")"
+                                onclick="confirmDeactivate(@Model.RestaurantId)">
+                            <i class="bi @(Model.IsActive ? "bi-power" : "bi-check-circle")"></i>
+                            @(Model.IsActive ? "Deactivate Restaurant" : "Activate Restaurant")
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        async function confirmDeactivate(restaurantId) {
+            const result = await Swal.fire({
+                title: '@(Model.IsActive ? "Deactivate Restaurant" : "Activate Restaurant")',
+                text: 'Are you sure you want to deactivate this restaurant? This will prevent new orders.',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'Yes, deactivate',
+                cancelButtonText: 'Cancel',
+                confirmButtonColor: '#dc3545'
+            });
+
+            if (result.isConfirmed) {
+                try {
+                    const response = await fetch('/Admin/RestaurantManagement/ToggleStatus/' + restaurantId, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]').value
+                        }
+                    });
+
+                    const data = await response.json();
+                    if (data.success) {
+                        // อัพเดต UI
+                        document.getElementById('IsActive').checked = false;
+
+                        Swal.fire({
+                            title: 'Success',
+                            text: 'Restaurant has been deactivated',
+                            icon: 'success'
+                        }).then(() => {
+                            // Reload เพื่ออัพเดตหน้า
+                            window.location.reload();
+                        });
+                    } else {
+                        Swal.fire('Error', data.message || 'Failed to deactivate restaurant', 'error');
+                    }
+                } catch (error) {
+                    Swal.fire('Error', 'An error occurred while deactivating the restaurant', 'error');
+                }
+            }
+        }
+    </script>
+}

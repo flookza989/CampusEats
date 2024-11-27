@@ -1,0 +1,190 @@
+﻿@model CampusEats.Web.Models.Order.OrderDetailViewModel
+
+@{
+    ViewData["Title"] = "Order Details";
+}
+
+<div class="container py-4">
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            @TempData["SuccessMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            @TempData["ErrorMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card mb-4">
+                <div class="card-header bg-white">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0">Order #@Model.OrderId</h5>
+                        <span class="badge @Model.StatusBadgeClass">@Model.Status</span>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="mb-4">
+                        <h6>Restaurant</h6>
+                        <p class="mb-1">@Model.RestaurantName</p>
+                        <p class="mb-0">
+                            <a href="tel:@Model.RestaurantPhone" class="text-decoration-none">
+                                <i class="bi bi-telephone"></i> @Model.RestaurantPhone
+                            </a>
+                        </p>
+                    </div>
+
+                    <div class="mb-4">
+                        <h6>Order Time</h6>
+                        <p class="mb-0">@Model.OrderTime.ToString("MMMM dd, yyyy HH:mm")</p>
+                    </div>
+
+                    <div class="table-responsive mb-4">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Item</th>
+                                    <th>Special Instructions</th>
+                                    <th class="text-end">Price</th>
+                                    <th class="text-center">Quantity</th>
+                                    <th class="text-end">Total</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var item in Model.Items)
+                                {
+                                    <tr>
+                                        <td>@item.Name</td>
+                                        <td>
+                                            <small class="text-muted">
+                                                @(string.IsNullOrEmpty(item.SpecialInstructions)
+                                                    ? "-" : item.SpecialInstructions)
+                                            </small>
+                                        </td>
+                                        <td class="text-end">฿@item.UnitPrice</td>
+                                        <td class="text-center">@item.Quantity</td>
+                                        <td class="text-end">฿@item.Total</td>
+                                    </tr>
+                                }
+                            </tbody>
+                            <tfoot>
+                                <tr>
+                                    <td colspan="4" class="text-end">
+                                        <strong>Total</strong>
+                                    </td>
+                                    <td class="text-end">
+                                        <strong>฿@Model.TotalAmount</strong>
+                                    </td>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+
+                    @if (!string.IsNullOrEmpty(Model.SpecialInstructions))
+                    {
+                        <div class="mb-4">
+                            <h6>Special Instructions</h6>
+                            <p class="mb-0">@Model.SpecialInstructions</p>
+                        </div>
+                    }
+
+                    @if (Model.CanBeCancelled)
+                    {
+                        <form asp-action="Cancel" asp-route-id="@Model.OrderId"
+                              onsubmit="return confirm('Are you sure you want to cancel this order?')"
+                              method="post">
+                            <button type="submit" class="btn btn-danger">
+                                <i class="bi bi-x-circle"></i> Cancel Order
+                            </button>
+                        </form>
+                    }
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Order Status Updates</h5>
+
+                    <div class="timeline mt-4">
+                        @foreach (var update in Model.StatusUpdates.OrderBy(u => u.UpdateTime))
+                        {
+                            <div class="timeline-item">
+                                <div class="timeline-icon">
+                                    @switch (update.Status.ToLower())
+                                    {
+                                        case "pending":
+                                            <i class="bi bi-clock text-warning"></i>
+                                            break;
+                                        case "preparing":
+                                            <i class="bi bi-tools text-info"></i>
+                                            break;
+                                        case "ready":
+                                            <i class="bi bi-check-circle text-success"></i>
+                                            break;
+                                        case "completed":
+                                            <i class="bi bi-bag-check text-primary"></i>
+                                            break;
+                                        case "cancelled":
+                                            <i class="bi bi-x-circle text-danger"></i>
+                                            break;
+                                        default:
+                                            <i class="bi bi-circle"></i>
+                                            break;
+                                    }
+                                </div>
+                                <div class="timeline-content">
+                                    <h6 class="mb-1">@update.Status</h6>
+                                    <p class="mb-1">@update.Message</p>
+                                    <small class="text-muted">
+                                        @update.UpdateTime.ToString("MMM dd, HH:mm")
+                                    </small>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .timeline {
+        position: relative;
+        padding-left: 30px;
+    }
+
+    .timeline-item {
+        position: relative;
+        padding-bottom: 1.5rem;
+    }
+
+        .timeline-item:not(:last-child)::before {
+            content: '';
+            position: absolute;
+            left: -17px;
+            top: 25px;
+            height: 100%;
+            border-left: 2px dashed #dee2e6;
+        }
+
+    .timeline-icon {
+        position: absolute;
+        left: -30px;
+        background: #fff;
+        padding: 5px;
+    }
+
+    .timeline-content {
+        padding-left: 10px;
+    }
+</style>

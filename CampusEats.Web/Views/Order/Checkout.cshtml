@@ -1,0 +1,115 @@
+﻿@model CampusEats.Web.Models.Order.CheckoutViewModel
+
+@{
+    ViewData["Title"] = "Checkout";
+}
+
+<div class="container py-4">
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card mb-4">
+                <div class="card-body">
+                    <h5 class="card-title">Order Details</h5>
+                    <p class="text-muted">Ordering from @Model.RestaurantName</p>
+
+                    <form asp-action="PlaceOrder" method="post">
+                        <input type="hidden" asp-for="RestaurantId" />
+                        <div asp-validation-summary="ModelOnly" class="alert alert-danger"></div>
+
+                        <div class="table-responsive mb-4">
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>Item</th>
+                                        <th>Special Instructions</th>
+                                        <th class="text-end">Price</th>
+                                        <th class="text-center">Quantity</th>
+                                        <th class="text-end">Total</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var item in Model.Items)
+                                    {
+                                        <tr>
+                                            <td>@item.Name</td>
+                                            <td>
+                                                <small class="text-muted">
+                                                    @(string.IsNullOrEmpty(item.SpecialInstructions)
+                                                        ? "-" : item.SpecialInstructions)
+                                                </small>
+                                            </td>
+                                            <td class="text-end">฿@item.Price</td>
+                                            <td class="text-center">@item.Quantity</td>
+                                            <td class="text-end">฿@item.Total</td>
+                                        </tr>
+                                    }
+                                </tbody>
+                                <tfoot>
+                                    <tr>
+                                        <td colspan="4" class="text-end"><strong>Total</strong></td>
+                                        <td class="text-end"><strong>฿@Model.SubTotal</strong></td>
+                                    </tr>
+                                </tfoot>
+                            </table>
+                        </div>
+
+                        <div class="mb-4">
+                            <label asp-for="SpecialInstructions" class="form-label">
+                                Special Instructions (Optional)
+                            </label>
+                            <textarea asp-for="SpecialInstructions" class="form-control" rows="3"
+                                      placeholder="Any special instructions for the restaurant?"></textarea>
+                            <span asp-validation-for="SpecialInstructions" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-4">
+                            <label asp-for="UserPhone" class="form-label">Contact Phone</label>
+                            <input asp-for="UserPhone" class="form-control" readonly />
+                            <small class="text-muted">
+                                This number will be used to contact you about your order if needed.
+                            </small>
+                        </div>
+
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="bi bi-bag-check"></i> Place Order (฿@Model.SubTotal)
+                            </button>
+                            <a href="javascript:history.back()" class="btn btn-outline-secondary">
+                                <i class="bi bi-arrow-left"></i> Back to Menu
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Order Summary</h5>
+                    <p class="card-text">@Model.Items.Count items</p>
+
+                    <ul class="list-group list-group-flush mb-3">
+                        <li class="list-group-item d-flex justify-content-between">
+                            <span>Subtotal</span>
+                            <span>฿@Model.SubTotal</span>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between">
+                            <span><strong>Total</strong></span>
+                            <span><strong>฿@Model.SubTotal</strong></span>
+                        </li>
+                    </ul>
+
+                    <div class="alert alert-info">
+                        <i class="bi bi-info-circle"></i>
+                        Please note that orders cannot be modified after being placed.
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

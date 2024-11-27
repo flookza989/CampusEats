@@ -1,0 +1,122 @@
+:root {
+    --primary-color: #2c3e50;
+    --secondary-color: #e74c3c;
+    --background-color: #f8f9fa;
+}
+
+html {
+    position: relative;
+    min-height: 100%;
+}
+
+body {
+    background-color: var(--background-color);
+}
+
+/* Custom button styles */
+.btn-primary {
+    background-color: var(--primary-color);
+    border-color: var(--primary-color);
+}
+
+    .btn-primary:hover {
+        background-color: #34495e;
+        border-color: #34495e;
+    }
+
+/* Card hover effect */
+.restaurant-card {
+    transition: transform 0.3s ease;
+}
+
+    .restaurant-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    }
+
+/* Menu item styles */
+.menu-item-image {
+    height: 200px;
+    object-fit: cover;
+}
+
+/* Order status badges */
+.status-badge {
+    padding: 0.5em 1em;
+    border-radius: 20px;
+    font-size: 0.85em;
+}
+
+.status-pending {
+    background-color: #ffeeba;
+}
+
+.status-preparing {
+    background-color: #b8daff;
+}
+
+.status-ready {
+    background-color: #c3e6cb;
+}
+
+.status-completed {
+    background-color: #d4edda;
+}
+
+.status-cancelled {
+    background-color: #f5c6cb;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .menu-item-image {
+        height: 150px;
+    }
+
+    .container {
+        padding-left: 15px;
+        padding-right: 15px;
+    }
+}
+
+/* Loading spinner */
+.spinner-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(255,255,255,0.8);
+    display: none;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+}
+
+    .spinner-overlay.show {
+        display: flex;
+    }
+
+/* Form styles */
+.form-control:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 0.2rem rgba(44, 62, 80, 0.25);
+}
+
+/* Toast notifications */
+.toast-container {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 1050;
+}
+
+.admin-dropdown .dropdown-item i {
+    margin-right: 0.5rem;
+    width: 1rem;
+}
+
+.admin-dropdown .dropdown-item:hover {
+    background-color: var(--primary-color);
+    color: white;
+}
