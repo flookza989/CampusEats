@@ -1,4 +1,4 @@
-﻿namespace CampusEats.Web.Areas.RestaurantOwner.Models.RestaurantOwner
+﻿namespace CampusEats.Web.Areas.RestaurantOwner.Models.Orders
 {
     public class OrderItemViewModel
     {

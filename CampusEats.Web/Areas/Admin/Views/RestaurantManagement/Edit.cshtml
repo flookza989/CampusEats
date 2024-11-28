@@ -1,5 +1,8 @@
-﻿@using CampusEats.Web.Areas.Admin.Models.Restaurant
-@model RestaurantEditViewModel
+﻿@{
+    ViewData["Title"] = "Edit Restaurant";
+}
+
+@model CampusEats.Web.Areas.Admin.Models.Restaurant.RestaurantEditViewModel
 
 <div class="container-fluid px-4">
     <div class="d-flex justify-content-between align-items-center mb-4">
@@ -109,73 +112,6 @@
                     </p>
                 </div>
             </div>
-
-            <div class="card shadow-sm">
-                <div class="card-body">
-                    <h5 class="card-title">Quick Actions</h5>
-                    <div class="d-grid gap-2">
-                        <a asp-area="Admin" asp-controller="RestaurantMenu"
-                           asp-action="Index" asp-route-restaurantId="@Model.RestaurantId"
-                           class="btn btn-outline-primary">
-                            <i class="bi bi-menu-button-wide"></i> Manage Menu
-                        </a>
-                        <button type="button"
-                                class="btn @(Model.IsActive ? "btn-danger" : "btn-success")"
-                                onclick="confirmDeactivate(@Model.RestaurantId)">
-                            <i class="bi @(Model.IsActive ? "bi-power" : "bi-check-circle")"></i>
-                            @(Model.IsActive ? "Deactivate Restaurant" : "Activate Restaurant")
-                        </button>
-                    </div>
-                </div>
-            </div>
         </div>
     </div>
 </div>
-
-@section Scripts {
-    <partial name="_ValidationScriptsPartial" />
-    <script>
-        async function confirmDeactivate(restaurantId) {
-            const result = await Swal.fire({
-                title: '@(Model.IsActive ? "Deactivate Restaurant" : "Activate Restaurant")',
-                text: 'Are you sure you want to deactivate this restaurant? This will prevent new orders.',
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonText: 'Yes, deactivate',
-                cancelButtonText: 'Cancel',
-                confirmButtonColor: '#dc3545'
-            });
-
-            if (result.isConfirmed) {
-                try {
-                    const response = await fetch('/Admin/RestaurantManagement/ToggleStatus/' + restaurantId, {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]').value
-                        }
-                    });
-
-                    const data = await response.json();
-                    if (data.success) {
-                        // อัพเดต UI
-                        document.getElementById('IsActive').checked = false;
-
-                        Swal.fire({
-                            title: 'Success',
-                            text: 'Restaurant has been deactivated',
-                            icon: 'success'
-                        }).then(() => {
-                            // Reload เพื่ออัพเดตหน้า
-                            window.location.reload();
-                        });
-                    } else {
-                        Swal.fire('Error', data.message || 'Failed to deactivate restaurant', 'error');
-                    }
-                } catch (error) {
-                    Swal.fire('Error', 'An error occurred while deactivating the restaurant', 'error');
-                }
-            }
-        }
-    </script>
-}

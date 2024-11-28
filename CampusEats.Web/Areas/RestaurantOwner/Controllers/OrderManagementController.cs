@@ -1,8 +1,6 @@
-﻿using CampusEats.Core.Enums;
-using CampusEats.Core.Interfaces;
-using CampusEats.Web.Areas.RestaurantOwner.Models.RestaurantOwner;
+﻿using CampusEats.Core.Interfaces;
+using CampusEats.Web.Areas.RestaurantOwner.Models.Orders;
 using CampusEats.Web.Hubs;
-using CampusEats.Web.Models.Order;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
@@ -54,7 +52,7 @@ namespace CampusEats.Web.Areas.RestaurantOwner.Controllers
                     Status = o.Status.ToString(),
                     TotalAmount = o.TotalAmount,
                     SpecialInstructions = o.SpecialInstructions,
-                    Items = o.OrderItems.Select(oi => new Models.RestaurantOwner.OrderItemViewModel
+                    Items = o.OrderItems.Select(oi => new OrderItemViewModel
                     {
                         Name = oi.MenuItem.Name,
                         UnitPrice = oi.UnitPrice,
@@ -77,7 +75,7 @@ namespace CampusEats.Web.Areas.RestaurantOwner.Controllers
                 startDate,
                 endDate);
 
-            var viewModel = new Models.RestaurantOwner.OrderHistoryViewModel
+            var viewModel = new OrderHistoryViewModel
             {
                 RestaurantId = restaurant.RestaurantId,
                 RestaurantName = restaurant.Name,
@@ -91,7 +89,7 @@ namespace CampusEats.Web.Areas.RestaurantOwner.Controllers
                     Status = o.Status.ToString(),
                     TotalAmount = o.TotalAmount,
                     SpecialInstructions = o.SpecialInstructions,
-                    Items = o.OrderItems.Select(oi => new Models.RestaurantOwner.OrderItemViewModel
+                    Items = o.OrderItems.Select(oi => new OrderItemViewModel
                     {
                         Name = oi.MenuItem.Name,
                         UnitPrice = oi.UnitPrice,

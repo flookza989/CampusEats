@@ -1,9 +1,12 @@
-﻿@using CampusEats.Web.Areas.Admin.Models.User
-@model List<UserViewModel>
+﻿@{
+    ViewData["Title"] = "User Management";
+}
+
+@model List<CampusEats.Web.Areas.Admin.Models.User.UserViewModel>
 
 <div class="container-fluid px-4">
     <div class="d-flex justify-content-between align-items-center mb-4">
-        <h1 class="h3">User Management System</h1>
+        <h1 class="h3">User Management</h1>
         <div class="d-flex gap-2">
             <div class="input-group">
                 <input type="text" id="searchInput" class="form-control" placeholder="Search users...">
@@ -43,7 +46,8 @@
                                     @{
                                         var badgeClass = user.UserType switch
                                         {
-                                            "Staff" => "bg-danger",
+                                            "SuperAdmin" => "bg-danger",
+                                            "Admin" => "bg-danger",
                                             "RestaurantOwner" => "bg-success",
                                             _ => "bg-primary"
                                         };

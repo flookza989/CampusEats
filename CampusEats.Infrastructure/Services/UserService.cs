@@ -27,7 +27,7 @@ namespace CampusEats.Infrastructure.Services
             if (user == null)
                 throw new UserNotFoundException(userId.ToString());
 
-            if (user.UserType == UserType.Staff)
+            if (user.UserType == UserType.Admin || user.UserType == UserType.SuperAdmin)
                 return false;
 
             if (user.UserType == UserType.RestaurantOwner)
@@ -41,7 +41,7 @@ namespace CampusEats.Infrastructure.Services
                 }
             }
 
-            if (user.UserType == UserType.Student)
+            if (user.UserType == UserType.Student || user.UserType == UserType.Personnel)
             {
                 var pendingOrders = (await _unitOfWork.Orders.GetOrdersByUserAsync(userId))
                     .Any(o => o.Status != OrderStatus.Completed && o.Status != OrderStatus.Cancelled);
@@ -97,10 +97,10 @@ namespace CampusEats.Infrastructure.Services
                 if (user == null)
                     throw new UserNotFoundException(userId.ToString());
 
-                if (user.UserType == UserType.Staff && user.IsActive)
+                if ((user.UserType == UserType.Admin || user.UserType == UserType.SuperAdmin) && user.IsActive)
                 {
                     var activeAdminCount = (await GetAllUsersAsync())
-                        .Count(u => u.UserType == UserType.Staff && u.IsActive);
+                        .Count(u => (user.UserType == UserType.Admin || user.UserType == UserType.SuperAdmin) && u.IsActive);
 
                     if (activeAdminCount <= 1)
                     {

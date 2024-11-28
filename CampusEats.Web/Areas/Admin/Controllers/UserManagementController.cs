@@ -8,7 +8,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace CampusEats.Web.Areas.Admin.Controllers
 {
     [Area("Admin")]
-    [Authorize(Roles = "Staff")]
+    [Authorize(Roles = "Admin,SuperAdmin")]
     public class UserManagementController : Controller
     {
         private readonly IUserService _userService;
@@ -21,7 +21,9 @@ namespace CampusEats.Web.Areas.Admin.Controllers
         public async Task<IActionResult> Index()
         {
             var users = await _userService.GetAllUsersAsync();
-            var viewModel = users.Select(u => new UserViewModel
+            var viewModel = users
+                .Where(u => u.UserType != UserType.SuperAdmin)
+                .Select(u => new UserViewModel
             {
                 UserId = u.UserId,
                 Username = u.Username,

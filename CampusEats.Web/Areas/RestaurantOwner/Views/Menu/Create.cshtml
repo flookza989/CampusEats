@@ -1,15 +1,23 @@
-﻿@using CampusEats.Web.Areas.RestaurantOwner.Models.Menu
-<!-- Areas/RestaurantOwner/Views/Menu/Create.cshtml -->
-@model CreateMenuItemViewModel
+﻿@{
+    ViewData["Title"] = "Add Menu Item";
+}
 
-<div class="container">
+@model CampusEats.Web.Areas.RestaurantOwner.Models.Menu.CreateMenuItemViewModel
+
+<div class="container-fluid px-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="h3">Add Menu Item</h1>
+        <a asp-area="RestaurantOwner" asp-controller="Menu" asp-action="Index" asp-route-restaurantId="@Model.RestaurantId"
+           class="btn btn-outline-secondary">
+            <i class="bi bi-arrow-left"></i> Back to Menu
+        </a>
+    </div>
+
     <div class="row justify-content-center">
         <div class="col-md-8">
-            <div class="card">
+            <div class="card shadow-sm">
                 <div class="card-body">
-                    <h2 class="card-title mb-4">Add Menu Item</h2>
-
-                    <form asp-action="Create" method="post" enctype="multipart/form-data">
+                    <form asp-area="RestaurantOwner" asp-controller="Menu" asp-action="Create" method="post" enctype="multipart/form-data">
                         <input type="hidden" asp-for="RestaurantId" />
                         <div asp-validation-summary="ModelOnly" class="alert alert-danger"></div>
 
@@ -40,21 +48,23 @@
                             <div id="imagePreview" class="mt-2 d-none">
                                 <img src="#" class="img-thumbnail" style="max-height: 200px;" />
                             </div>
+                            <small class="text-muted">
+                                Maximum file size: 5MB. Supported formats: JPEG, PNG, GIF
+                            </small>
                         </div>
 
                         <div class="mb-3">
-                            <div class="form-check">
+                            <div class="form-check form-switch">
                                 <input asp-for="IsAvailable" class="form-check-input" />
-                                <label asp-for="IsAvailable" class="form-check-label">Available for order</label>
+                                <label asp-for="IsAvailable" class="form-check-label">
+                                    Available for order
+                                </label>
                             </div>
                         </div>
 
-                        <div class="d-flex justify-content-between">
-                            <a asp-action="Index" class="btn btn-secondary">
-                                <i class="bi bi-arrow-left"></i> Back to Menu
-                            </a>
+                        <div class="text-end">
                             <button type="submit" class="btn btn-primary">
-                                <i class="bi bi-plus-circle"></i> Add Item
+                                <i class="bi bi-plus-circle"></i> Add Menu Item
                             </button>
                         </div>
                     </form>

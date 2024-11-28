@@ -25,7 +25,6 @@ namespace CampusEats.Web.Areas.RestaurantOwner.Controllers
                 return Forbid();
             }
 
-            // Process menu item creation
             var menuItem = new MenuItem
             {
                 RestaurantId = model.RestaurantId,

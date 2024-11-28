@@ -9,7 +9,9 @@ namespace CampusEats.Core.Enums
     public enum UserType
     {
         Student,
-        Staff,
-        RestaurantOwner
+        Personnel,
+        RestaurantOwner,
+        Admin,
+        SuperAdmin
     }
 }

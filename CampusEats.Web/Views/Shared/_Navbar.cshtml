@@ -9,7 +9,7 @@
         <div class="collapse navbar-collapse" id="navbarNav">
             <ul class="navbar-nav me-auto">
                 @* เมนูสำหรับ Admin *@
-                @if (User.IsInRole("Staff"))
+                @if (User.IsInRole("SuperAdmin") || User.IsInRole("Admin"))
                 {
                     <li class="nav-item">
                         <a class="nav-link @(ViewContext.RouteData.Values["Controller"]?.ToString() == "UserManagement" ? "active" : "")"
@@ -45,7 +45,7 @@
                     </li>
                 }
                 @* เมนูสำหรับเจ้าของนักศึกษา*@
-                @if (User.IsInRole("Student"))
+                @if (User.IsInRole("Student") || User.IsInRole("Personnel"))
                 {
                     <li class="nav-item">
                         <a class="nav-link" asp-area="" asp-controller="Restaurant" asp-action="Index">
@@ -65,7 +65,7 @@
                 @if (User.Identity?.IsAuthenticated == true)
                 {
                     @* การแจ้งเตือน - แสดงเฉพาะเจ้าของร้านและผู้ใช้ทั่วไป *@
-                    @if (!User.IsInRole("Staff"))
+                    @if (!(User.IsInRole("SuperAdmin") || User.IsInRole("Admin")))
                     {
                         <li class="nav-item">
                             <a class="nav-link position-relative" asp-area="" asp-controller="Notification" asp-action="Index">

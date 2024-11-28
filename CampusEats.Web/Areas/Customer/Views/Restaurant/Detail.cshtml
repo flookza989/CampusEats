@@ -1,0 +1,196 @@
+﻿@model CampusEats.Areas.Customer.Models.Restaurant.RestaurantDetailViewModel
+
+@{
+    ViewData["Title"] = Model.Name;
+}
+
+<div class="container">
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <h2>@Model.Name</h2>
+            <p class="text-muted">@Model.Description</p>
+            <p>
+                <i class="bi bi-geo-alt"></i> @Model.Location<br>
+                <i class="bi bi-telephone"></i> @Model.Phone
+            </p>
+        </div>
+        <div class="col-md-4 text-end">
+            <div class="mb-2">
+                <span class="badge @(Model.IsOpen ? "bg-success" : "bg-danger") p-2">
+                    <i class="bi @(Model.IsOpen ? "bi-shop" : "bi-shop-window")"></i>
+                    @(Model.IsOpen ? "เปิดให้บริการ" : "ปิดให้บริการ")
+                </span>
+            </div>
+            <small class="text-muted">
+                เวลาทำการ: @Model.OpeningTime.ToString("hh\\:mm") - @Model.ClosingTime.ToString("hh\\:mm")
+            </small>
+        </div>
+    </div>
+
+    @foreach (var category in Model.Categories)
+    {
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="card-title mb-0">@category.Name</h5>
+            </div>
+            <div class="card-body">
+                <div class="row row-cols-1 row-cols-md-2 g-4">
+                    @foreach (var item in category.Items.Where(i => i.IsAvailable))
+                    {
+                        <div class="col">
+                            <div class="card h-100">
+                                <div class="row g-0">
+                                    <div class="col-md-4">
+                                        @if (!string.IsNullOrEmpty(item.ImageUrl))
+                                        {
+                                            <img src="@item.ImageUrl" class="img-fluid rounded-start" alt="@item.Name"
+                                                 style="height: 100%; object-fit: cover;">
+                                        }
+                                        else
+                                        {
+                                            <div class="bg-light d-flex align-items-center justify-content-center h-100">
+                                                <i class="bi bi-image text-muted" style="font-size: 2rem;"></i>
+                                            </div>
+                                        }
+                                    </div>
+                                    <div class="col-md-8">
+                                        <div class="card-body">
+                                            <h5 class="card-title">@item.Name</h5>
+                                            <p class="card-text small text-muted">@item.Description</p>
+                                            <div class="d-flex justify-content-between align-items-center">
+                                                <span class="fw-bold">฿@item.Price.ToString("N2")</span>
+                                                <button class="btn btn-outline-primary btn-sm add-to-cart"
+                                                        data-item-id="@item.ItemId"
+                                                        data-item-name="@item.Name"
+                                                        data-item-price="@item.Price"
+                                                        data-restaurant-id="@Model.RestaurantId"
+                                                        data-restaurant-name="@Model.Name">
+                                                    <i class="bi bi-cart-plus"></i> เพิ่มลงตะกร้า
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+<!-- Modal สำหรับเพิ่มสินค้าลงตะกร้า -->
+<div class="modal fade" id="addToCartModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">เพิ่มลงตะกร้า</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="addToCartForm">
+                    <input type="hidden" id="menuItemId" name="menuItemId">
+                    <input type="hidden" id="restaurantId" name="restaurantId">
+                    <input type="hidden" id="restaurantName" name="restaurantName">
+                    <input type="hidden" id="itemName" name="itemName">
+                    <input type="hidden" id="itemPrice" name="itemPrice">
+
+                    <div class="mb-3">
+                        <label for="quantity" class="form-label">จำนวน</label>
+                        <input type="number" class="form-control" id="quantity" name="quantity"
+                               value="1" min="1" max="10">
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="specialInstructions" class="form-label">หมายเหตุเพิ่มเติม</label>
+                        <textarea class="form-control" id="specialInstructions" name="specialInstructions"
+                                  rows="2" placeholder="เช่น ไม่ใส่ผัก, เผ็ดน้อย"></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">ยกเลิก</button>
+                <button type="button" class="btn btn-primary" id="confirmAddToCart">เพิ่มลงตะกร้า</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function() {
+            const modal = new bootstrap.Modal(document.getElementById('addToCartModal'));
+
+            // เมื่อคลิกปุ่มเพิ่มลงตะกร้า
+            $('.add-to-cart').click(function() {
+                const button = $(this);
+                $('#menuItemId').val(button.data('item-id'));
+                $('#restaurantId').val(button.data('restaurant-id'));
+                $('#restaurantName').val(button.data('restaurant-name'));
+                $('#itemName').val(button.data('item-name'));
+                $('#itemPrice').val(button.data('item-price'));
+
+                modal.show();
+            });
+
+            // เมื่อยืนยันการเพิ่มลงตะกร้า
+            $('#confirmAddToCart').click(async function() {
+                try {
+                    const response = await fetch('/Customer/Cart/AddItem', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'RequestVerificationToken': $('input[name="__RequestVerificationToken"]').val()
+                        },
+                        body: JSON.stringify({
+                            restaurantId: $('#restaurantId').val(),
+                            restaurantName: $('#restaurantName').val(),
+                            menuItemId: $('#menuItemId').val(),
+                            name: $('#itemName').val(),
+                            price: $('#itemPrice').val(),
+                            quantity: $('#quantity').val(),
+                            specialInstructions: $('#specialInstructions').val()
+                        })
+                    });
+
+                    const data = await response.json();
+                    if (data.success) {
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Added to cart',
+                            toast: true,
+                            position: 'top-end',
+                            showConfirmButton: false,
+                            timer: 3000
+                        });
+
+                        // อัพเดทไอคอนตะกร้าและจำนวนสินค้า
+                        updateCartCount(data.itemCount);
+                    } else {
+                        throw new Error(data.message);
+                    }
+
+                    modal.hide();
+                    $('#addToCartForm')[0].reset();
+
+                } catch (error) {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error occurred',
+                        text: error.message || 'Unable to add item to cart',
+                    });
+                }
+            });
+
+            function updateCartCount(count) {
+                const badge = $('#cart-count');
+                if (count > 0) {
+                    badge.text(count).show();
+                } else {
+                    badge.hide();
+                }
+            }
+        });
+    </script>
+}

@@ -1,6 +1,4 @@
-﻿using static CampusEats.Web.Areas.RestaurantOwner.Models.RestaurantOwner.LiveOrdersViewModel;
-
-namespace CampusEats.Web.Areas.RestaurantOwner.Models.RestaurantOwner
+﻿namespace CampusEats.Web.Areas.RestaurantOwner.Models.Orders
 {
     public class OrderManagementViewModel
     {

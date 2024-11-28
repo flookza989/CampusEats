@@ -8,7 +8,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace CampusEats.Web.Areas.Admin.Controllers
 {
     [Area("Admin")]
-    [Authorize(Roles = "Staff")]
+    [Authorize(Roles = "Admin,SuperAdmin")]
     public class RestaurantMenuController : Controller
     {
         private readonly IMenuService _menuService;

@@ -1,14 +1,23 @@
-﻿@using CampusEats.Web.Areas.RestaurantOwner.Models.Menu
-@model EditMenuItemViewModel
+﻿@{
+    ViewData["Title"] = "Edit Menu Item";
+}
 
-<div class="container">
+@model CampusEats.Web.Areas.RestaurantOwner.Models.Menu.EditMenuItemViewModel
+
+<div class="container-fluid px-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="h3">Edit Menu Item</h1>
+        <a asp-area="RestaurantOwner" asp-controller="Menu" asp-action="Index" asp-route-restaurantId="@Model.RestaurantId"
+           class="btn btn-outline-secondary">
+            <i class="bi bi-arrow-left"></i> Back to Menu
+        </a>
+    </div>
+
     <div class="row justify-content-center">
         <div class="col-md-8">
-            <div class="card">
+            <div class="card shadow-sm">
                 <div class="card-body">
-                    <h2 class="card-title mb-4">Edit Menu Item</h2>
-
-                    <form asp-action="Edit" method="post" enctype="multipart/form-data">
+                    <form asp-area="RestaurantOwner" asp-controller="Menu" asp-action="Edit" method="post" enctype="multipart/form-data">
                         <input type="hidden" asp-for="ItemId" />
                         <input type="hidden" asp-for="RestaurantId" />
                         <div asp-validation-summary="ModelOnly" class="alert alert-danger"></div>
@@ -40,7 +49,7 @@
                                 <label class="form-label">Current Image</label>
                                 <div>
                                     <img src="@Model.CurrentImageUrl" class="img-thumbnail"
-                                         style="max-height: 200px;" alt="Current image" />
+                                         alt="Current image" style="max-height: 200px;" />
                                 </div>
                             </div>
                         }
@@ -51,19 +60,22 @@
                             <div id="imagePreview" class="mt-2 d-none">
                                 <img src="#" class="img-thumbnail" style="max-height: 200px;" />
                             </div>
+                            <small class="text-muted">
+                                Leave empty to keep current image. Maximum file size: 5MB.
+                                Supported formats: JPEG, PNG, GIF
+                            </small>
                         </div>
 
                         <div class="mb-3">
-                            <div class="form-check">
+                            <div class="form-check form-switch">
                                 <input asp-for="IsAvailable" class="form-check-input" />
-                                <label asp-for="IsAvailable" class="form-check-label">Available for order</label>
+                                <label asp-for="IsAvailable" class="form-check-label">
+                                    Available for order
+                                </label>
                             </div>
                         </div>
 
-                        <div class="d-flex justify-content-between">
-                            <a asp-action="Index" class="btn btn-secondary">
-                                <i class="bi bi-arrow-left"></i> Back to Menu
-                            </a>
+                        <div class="text-end">
                             <button type="submit" class="btn btn-primary">
                                 <i class="bi bi-save"></i> Save Changes
                             </button>
@@ -72,13 +84,48 @@
                 </div>
             </div>
         </div>
+    
+
+    <!-- Side Panel for Additional Information -->
+    <div class="col-md-4 mt-sm-4">
+        <div class="card shadow-sm mb-4">
+            <div class="card-body">
+                <h5 class="card-title">Image Guidelines</h5>
+                <ul class="list-unstyled">
+                    <li><i class="bi bi-check-circle text-success"></i> Maximum file size: 5MB</li>
+                    <li><i class="bi bi-check-circle text-success"></i> Recommended size: 800x600 pixels</li>
+                    <li><i class="bi bi-check-circle text-success"></i> Supported formats: JPEG, PNG, GIF</li>
+                    <li><i class="bi bi-check-circle text-success"></i> Square or landscape orientation</li>
+                </ul>
+                <div class="alert alert-info">
+                    <i class="bi bi-info-circle"></i>
+                    High-quality images can help increase customer interest in menu items.
+                </div>
+            </div>
+        </div>
+
+        <div class="card shadow-sm">
+            <div class="card-body">
+                <h5 class="card-title">Pricing Tips</h5>
+                <ul class="list-unstyled">
+                    <li><i class="bi bi-currency-dollar"></i> Set competitive prices</li>
+                    <li><i class="bi bi-graph-up"></i> Consider your costs and margins</li>
+                    <li><i class="bi bi-tags"></i> Round prices appropriately</li>
+                </ul>
+                <div class="alert alert-warning">
+                    <i class="bi bi-exclamation-triangle"></i>
+                    Price changes will affect new orders only.
+                </div>
+            </div>
+        </div>
+    </div>
     </div>
 </div>
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
     <script>
-        // Image preview
+        // Image preview for new image
         document.querySelector('input[type="file"]').addEventListener('change', function(e) {
             const file = e.target.files[0];
             if (file) {
@@ -93,6 +140,50 @@
 
                 reader.readAsDataURL(file);
             }
+        });
+
+        // Form validation
+        $(document).ready(function () {
+            $('form').validate({
+                rules: {
+                    Name: {
+                        required: true,
+                        maxlength: 100
+                    },
+                    Description: {
+                        maxlength: 500
+                    },
+                    Price: {
+                        required: true,
+                        number: true,
+                        min: 0.01,
+                        max: 10000
+                    }
+                },
+                messages: {
+                    Name: {
+                        required: "Please enter the item name",
+                        maxlength: "Name cannot exceed 100 characters"
+                    },
+                    Description: {
+                        maxlength: "Description cannot exceed 500 characters"
+                    },
+                    Price: {
+                        required: "Please enter the price",
+                        number: "Please enter a valid number",
+                        min: "Price must be at least ฿0.01",
+                        max: "Price cannot exceed ฿10,000"
+                    }
+                },
+                errorElement: 'span',
+                errorClass: 'text-danger',
+                highlight: function(element) {
+                    $(element).addClass('is-invalid');
+                },
+                unhighlight: function(element) {
+                    $(element).removeClass('is-invalid');
+                }
+            });
         });
     </script>
 }

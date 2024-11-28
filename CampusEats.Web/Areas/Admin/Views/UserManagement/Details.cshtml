@@ -1,4 +1,7 @@
-﻿@* /Areas/Admin/Views/UserManagement/Details.cshtml *@
+﻿@{
+    ViewData["Title"] = "User Details";
+}
+
 @model CampusEats.Web.Areas.Admin.Models.User.UserDetailsViewModel
 
 <div class="container-fluid px-4">
@@ -150,7 +153,6 @@
 </div>
 
 @section Scripts {
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
                 async function toggleUserStatus(userId) {
             try {

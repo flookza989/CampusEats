@@ -1,5 +1,8 @@
-﻿@using CampusEats.Web.Areas.Admin.Models.Restaurant
-@model List<RestaurantViewModel>
+﻿@{
+    ViewData["Title"] = "Restaurant Management";
+}
+
+@model List<CampusEats.Web.Areas.Admin.Models.Restaurant.RestaurantViewModel>
 
 <div class="container-fluid px-4">
     <div class="d-flex justify-content-between align-items-center mb-4">
@@ -125,7 +128,7 @@
             }
         });
 
-        // Toggle status function
+        // Toggle Status
         document.querySelectorAll('.toggle-status').forEach(toggle => {
             toggle.addEventListener('change', async function() {
                 const restaurantId = this.dataset.restaurantId;
@@ -133,68 +136,53 @@
                 const statusLabel = this.nextElementSibling;
 
                 try {
-                    const result = await Swal.fire({
-                        title: 'Confirm Status Change',
-                        text: `Do you want to ${isChecked ? 'activate' : 'deactivate'} this restaurant?`,
-                        icon: 'warning',
-                        showCancelButton: true,
-                        confirmButtonText: 'Yes',
-                        cancelButtonText: 'No'
+                    const response = await fetch(`/Admin/RestaurantManagement/ToggleStatus/${restaurantId}`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'RequestVerificationToken': document
+                                .querySelector('input[name="__RequestVerificationToken"]').value
+                        }
                     });
 
-                    if (result.isConfirmed) {
-                        const response = await fetch(`/Admin/RestaurantManagement/ToggleStatus/${restaurantId}`, {
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/json',
-                            }
+                    const data = await response.json();
+                    if (data.success) {
+                        statusLabel.textContent = isChecked ? 'Active' : 'Inactive';
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Updated',
+                            text: 'Restaurant status updated successfully',
+                            toast: true,
+                            position: 'top-end',
+                            showConfirmButton: false,
+                            timer: 3000
                         });
-
-                        const data = await response.json();
-                        if (data.success) {
-                            statusLabel.textContent = isChecked ? 'Active' : 'Inactive';
-                            Swal.fire('Success', 'Restaurant status updated successfully', 'success');
-                        } else {
-                            this.checked = !isChecked;
-                            Swal.fire('Error', data.message || 'Failed to update status', 'error');
-                        }
                     } else {
                         this.checked = !isChecked;
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Error',
+                            text: data.message || 'Failed to update restaurant status',
+                            toast: true,
+                            position: 'top-end',
+                            showConfirmButton: false,
+                            timer: 3000
+                        });
                     }
                 } catch (error) {
                     this.checked = !isChecked;
-                    Swal.fire('Error', 'An error occurred while updating status', 'error');
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: 'An error occurred while updating status',
+                        toast: true,
+                        position: 'top-end',
+                        showConfirmButton: false,
+                        timer: 3000
+                    });
                 }
             });
         });
-
-        // View menu items function
-        async function viewMenuItems(restaurantId) {
-            try {
-                const response = await fetch(`/Admin/RestaurantManagement/GetMenuItems/${restaurantId}`);
-                const data = await response.json();
-
-                let menuHtml = '<div class="table-responsive"><table class="table">';
-                menuHtml += '<thead><tr><th>Name</th><th>Price</th><th>Status</th></tr></thead><tbody>';
-
-                data.forEach(item => {
-                    menuHtml += `
-                        <tr>
-                            <td>${item.name}</td>
-                            <td>$${item.price.toFixed(2)}</td>
-                            <td>${item.isAvailable ? '<span class="badge bg-success">Available</span>' :
-                                                    '<span class="badge bg-danger">Unavailable</span>'}</td>
-                        </tr>`;
-                });
-
-                menuHtml += '</tbody></table></div>';
-                document.getElementById('menuContent').innerHTML = menuHtml;
-
-                new bootstrap.Modal(document.getElementById('menuModal')).show();
-            } catch (error) {
-                Swal.fire('Error', 'Failed to load menu items', 'error');
-            }
-        }
 
         // Export to Excel function
         function exportToExcel() {

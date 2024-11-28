@@ -52,15 +52,14 @@
     {
         <script>
             document.addEventListener('DOMContentLoaded', function() {
-                Toastify({
+                Swal.fire({
+                    icon: 'success',
                     text: '@TempData["SuccessMessage"]',
-                    duration: 3000,
-                    gravity: "top",
-                    position: "right",
-                    backgroundColor: "#28a745",
-                    stopOnFocus: true,
-                    close: true
-                }).showToast();
+                    toast: true,
+                    position: 'top-end',
+                    showConfirmButton: false,
+                    timer: 3000
+                });
             });
         </script>
     }
@@ -69,15 +68,14 @@
     {
         <script>
             document.addEventListener('DOMContentLoaded', function() {
-                Toastify({
+                Swal.fire({
+                    icon: 'error',
                     text: '@TempData["ErrorMessage"]',
-                    duration: 3000,
-                    gravity: "top",
-                    position: "right",
-                    backgroundColor: "#dc3545",
-                    stopOnFocus: true,
-                    close: true
-                }).showToast();
+                    toast: true,
+                    position: 'top-end',
+                    showConfirmButton: false,
+                    timer: 3000
+                });
             });
         </script>
     }

@@ -1,6 +1,7 @@
 ﻿using CampusEats.Core.Entities;
 using CampusEats.Core.Interfaces;
 using CampusEats.Web.Areas.RestaurantOwner.Models.Menu;
+using CampusEats.Web.Areas.RestaurantOwner.Models.RestaurantOwner;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
@@ -38,9 +39,9 @@ namespace CampusEats.Web.Areas.RestaurantOwner.Controllers
                     return RedirectToAction("Create", "Settings");
                 }
 
-                var menuItems = await _menuService.GetAvailableMenuItemsAsync(restaurant.RestaurantId);
+                var menuItems = await _menuService.GetAllMenuItemsAsync(restaurant.RestaurantId);
 
-                var viewModel = new MenuListViewModel
+                var viewModel = new RestaurantMenuViewModel
                 {
                     RestaurantId = restaurant.RestaurantId,
                     RestaurantName = restaurant.Name,

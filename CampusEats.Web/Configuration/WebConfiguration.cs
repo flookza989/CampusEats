@@ -1,4 +1,6 @@
 ﻿using CampusEats.Infrastructure.Configuration;
+using CampusEats.Web.Areas.Customer.Interfaces;
+using CampusEats.Web.Areas.Customer.Services;
 using CampusEats.Web.Hubs;
 using CampusEats.Web.Interface;
 using CampusEats.Web.Services;
@@ -28,6 +30,7 @@ namespace CampusEats.Web.Configuration
                 });
 
             // Add Cart Service
+            services.AddScoped<IShoppingCartService, ShoppingCartService>();
             services.AddScoped<ICartService, CartService>();
 
             // Add Session
